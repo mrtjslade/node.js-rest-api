@@ -9,6 +9,7 @@
   "author": "TJ Slade",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "mongodb": "^5.4.0"
   }
