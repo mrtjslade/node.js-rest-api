@@ -1,7 +1,17 @@
-const fs = require('fs');
-const path = require('path');
+const mongoose = require('mongoose');
 
-const statesFilePath = path.join(__dirname, 'data', 'statesData.json');
-const statesData = JSON.parse(fs.readFileSync(statesFilePath, 'utf8'));
+const stateSchema = new mongoose.Schema({
+  stateCode: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  funfacts: {
+    type: [String],
+    default: []
+  }
+});
 
-console.log(statesData.states[0].name);
+const State = mongoose.model('State', stateSchema);
+
+module.exports = State;
