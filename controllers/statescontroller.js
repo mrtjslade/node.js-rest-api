@@ -1,149 +1,194 @@
-const State = require('../models/State');
 const statesData = require('../models/statesData.json');
+const State = require('../models/State');
 
-// Get all states
 const getAllStates = async (req, res) => {
   try {
     const { contig } = req.query;
-    const states = await State.find();
-    const resultStates = [];
+    let states = statesData;
 
-    for (const state of statesData) {
-      const foundState = states.find(s => s.stateCode === state.code);
-
-      if (contig === 'true') {
-        if (state.code !== 'AK' && state.code !== 'HI' && foundState) {
-          resultStates.push({ ...state, funfacts: foundState.funfacts });
-        }
-      } else {
-        if (foundState) {
-          resultStates.push({ ...state, funfacts: foundState.funfacts });
-        } else {
-          resultStates.push(state);
-        }
-      }
+    if (contig === 'true') {
+      states = states.filter((state) => state.code !== 'AK' && state.code !== 'HI');
+    } else if (contig === 'false') {
+      states = states.filter((state) => state.code === 'AK' || state.code === 'HI');
     }
 
-    res.json(resultStates);
+    if (states.length === 0) {
+      return res.status(404).json({ error: 'No states found' });
+    }
+
+    res.json(states);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Failed to fetch states' });
   }
 };
 
-// Get state by stateCode
-const getState = async (req, res) => {
-  const { state } = req.params;
+const getStateByCode = async (req, res) => {
   try {
-    const stateData = await State.findOne({ stateCode: state });
-    const foundState = statesData.find(s => s.code === state);
+    const { state } = req.params;
+
+    const foundState = statesData.find((s) => s.code.toLowerCase() === state.toLowerCase());
 
     if (!foundState) {
       return res.status(404).json({ error: 'State not found' });
     }
 
-    const stateWithFunFacts = { ...foundState };
-    if (stateData) {
-      stateWithFunFacts.funfacts = stateData.funfacts;
-    }
-
-    res.json(stateWithFunFacts);
+    res.json(foundState);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch state' });
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch state data' });
   }
 };
 
-// Get random fun fact for state
-const getFunfact = async (req, res) => {
-  const { state } = req.params;
+const getStateCapital = async (req, res) => {
   try {
-    const stateData = await State.findOne({ stateCode: state });
-    const foundState = statesData.find(s => s.code === state);
+    const { state } = req.params;
+
+    const foundState = statesData.find((s) => s.code.toLowerCase() === state.toLowerCase());
 
     if (!foundState) {
       return res.status(404).json({ error: 'State not found' });
     }
 
-    let funfact = '';
-    if (stateData && stateData.funfacts.length > 0) {
-      funfact = stateData.funfacts[Math.floor(Math.random() * stateData.funfacts.length)];
-    }
+    const { state: stateName, capital_city: capital } = foundState;
 
-    res.json({ state: foundState.name, funfact });
+    res.json({ state: stateName, capital });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch fun fact' });
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch state capital' });
   }
 };
 
-// Get capital for state
-const getCapital = async (req, res) => {
-  const { state } = req.params;
+const getStateNickname = async (req, res) => {
   try {
-    const foundState = statesData.find(s => s.code === state);
+    const { state } = req.params;
+
+    const foundState = statesData.find((s) => s.code.toLowerCase() === state.toLowerCase());
 
     if (!foundState) {
       return res.status(404).json({ error: 'State not found' });
     }
 
-    res.json({ state: foundState.name, capital: foundState.capital });
+    const { state: stateName, nickname } = foundState;
+
+    res.json({ state: stateName, nickname });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch capital' });
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch state nickname' });
   }
 };
 
-// Get nickname for state
-const getNickname = async (req, res) => {
-  const { state } = req.params;
+const getStatePopulation = async (req, res) => {
   try {
-    const foundState = statesData.find(s => s.code === state);
+    const { state } = req.params;
+
+    const foundState = statesData.find((s) => s.code.toLowerCase() === state.toLowerCase());
 
     if (!foundState) {
       return res.status(404).json({ error: 'State not found' });
     }
 
-    res.json({  state: foundState.name, nickname: foundState.nickname });
+    const { state: stateName, population } = foundState;
+    const formattedPopulation = population.toLocaleString();
+
+    res.json({ state: stateName, population: formattedPopulation });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch nickname' });
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch state population' });
   }
 };
 
-// Get population for state
-const getPopulation = async (req, res) => {
-  const { state } = req.params;
+const getStateAdmission = async (req, res) => {
   try {
-    const foundState = statesData.find(s => s.code === state);
+    const { state } = req.params;
+
+    const foundState = statesData.find((s) => s.code.toLowerCase() === state.toLowerCase());
 
     if (!foundState) {
       return res.status(404).json({ error: 'State not found' });
     }
 
-    res.json({ state: foundState.name, population: foundState.population });
+    const { state: stateName, admission_date: admission } = foundState;
+
+    res.json({ state: stateName, admitted: admission });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch population' });
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch state admission' });
   }
 };
 
-// Get admission date for state
-const getAdmission = async (req, res) => {
-  const { state } = req.params;
+const getRandomFunFact = async (req, res) => {
   try {
-    const foundState = statesData.find(s => s.code === state);
+    const { state } = req.params;
+
+    const foundState = statesData.find((s) => s.code.toLowerCase() === state.toLowerCase());
+
+    if (!foundState) {
+      return res.status(404).json({ message: `No Fun Facts found for ${state}` });
+    }
+
+    const { funfacts } = foundState;
+
+    if (!funfacts || funfacts.length === 0) {
+      return res.status(404).json({ message: `No Fun Facts found for ${foundState.state}` });
+    }
+
+    const randomIndex = Math.floor(Math.random() * funfacts.length);
+    const randomFunFact = funfacts[randomIndex];
+
+    res.json({ state: foundState.state, funfact: randomFunFact });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch random Fun Fact' });
+  }
+};
+
+const addStateFunFacts = async (req, res) => {
+  try {
+    const { state } = req.params;
+    const { funfacts } = req.body;
+
+    const foundState = await State.findOne({ code: state });
 
     if (!foundState) {
       return res.status(404).json({ error: 'State not found' });
     }
 
-    res.json({ state: foundState.name, admission: foundState.admission });
+    const uniqueFunFacts = [...new Set([...foundState.funfacts, ...funfacts])];
+    foundState.funfacts = uniqueFunFacts;
+    
+    await foundState.save();
+
+    res.json({ message: 'Fun facts added successfully' });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch admission date' });
+    console.error(error);
+    res.status(500).json({ error: 'Failed to add fun facts' });
   }
 };
+
+const insertStateCodes = async () => {
+  try {
+    const stateCodes = [
+      { stateCode: 'AL' },
+      { stateCode: 'AK' }
+    ];
+
+    await State.insertMany(stateCodes);
+    console.log('State codes inserted successfully');
+  } catch (error) {
+    console.error('Failed to insert state codes:', error);
+  }
+};
+
+insertStateCodes();
 
 module.exports = {
   getAllStates,
-  getState,
-  getFunfact,
-  getCapital,
-  getNickname,
-  getPopulation,
-  getAdmission
+  getStateByCode,
+  getStateCapital,
+  getStateNickname,
+  getStatePopulation,
+  getStateAdmission,
+  getRandomFunFact,
+  addStateFunFacts
 };

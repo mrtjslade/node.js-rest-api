@@ -1,17 +1,15 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const stateSchema = new mongoose.Schema({
-  stateCode: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  funfacts: {
-    type: [String],
-    default: []
-  }
+const stateSchema = new Schema({
+    stateCode: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    funfacts: [{
+        type: String,
+    }]
 });
 
-const State = mongoose.model('State', stateSchema);
-
-module.exports = State;
+module.exports = mongoose.model("State", stateSchema);
